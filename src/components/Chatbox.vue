@@ -11,13 +11,32 @@
 
             </div>
             <div class="messages">
+            	<div class="messages-content container" v-for="(message, index) in messages">
+	            	<div class="message new" v-if="message.from === 'bot'">
+						<figure class="avatar">
+							<img alt="Vue logo" src="../assets/robot01_90832.png">
+						</figure>
+							<div v-html="message.text"></div>
+						<div class="timestamp">
+                            {{formatDate(message.timestamp)}}
+                        </div>
+	            	</div>
+					<div class="message message-personal  new" v-else>
+							<div v-html="message.text"></div>
+						<div class="timestamp">
+                            {{formatDate(message.timestamp)}}
+                        </div>
+					</div>
+				</div>
             </div>
             <div class="message-box">
-                <form class="">
+                <form class="" @submit.prevent="addMessages">
                     <textarea
                         type="text"
                         class="message-input"
                         placeholder="Type message..."
+                        v-model="text"
+                        name="text"
                     />
                     <button type="button" class="fileContainer">
                         File
@@ -37,15 +56,67 @@
         </div>
         <div class="bg" />
     </div>
-    
 </template>
 <script>
 export default {
 	name: 'ChatBox',
 	props: {
 		msg: String
+	},
+	data() {
+		return {
+			text: '',
+			messages: [
+                {
+                    id: new Date().getTime(),
+                    from: 'bot',
+                    text: `Hye there!! can I help you?`,
+                    isFile: false,
+                    timestamp: new Date(),
+                },
+                {
+                    id: new Date().getTime() + 1,
+                    from: 'user',
+                    text: 'Somebody!! Help!',
+                    isFile: false,
+                    timestamp: new Date(),
+                },
+                {
+                    id: new Date().getTime() + 2,
+                    from: 'bot',
+                    text: 'But first, what you want to do?',
+                    button: [
+                        {
+                            id: 0,
+                            text: 'Sign-In',
+                        },
+                        {
+                            id: 1,
+                            text: 'Log-In',
+                        },
+                    ],
+                    isButtonDisabled: false,
+                    isFile: false,
+                    timestamp: new Date(),
+                },
+            ],
+		}
+	},
+	methods: {
+		formatDate(date) {
+			let hours = date.getHours();
+			let minutes = date.getMinutes();
+			const ampm = hours >= 12 ? 'pm' : 'am';
+			hours %= 12;
+			hours = hours || 12; // the hour '0' should be '12'
+			minutes = minutes < 10 ? `0${minutes}` : minutes;
+			const strTime = `${hours}:${minutes} ${ampm}`;
+			return `${date.getMonth() +
+			1}/${date.getDate()}/${date.getFullYear()} ${strTime}`;
+
+		},
 	}
-}	
+}
 </script>
 <style scoped>
 /*--------------------
