@@ -10,7 +10,7 @@
                 </figure>
 
             </div>
-            <div class="messages">
+            <div class="messages" ref="chatContent">
             	<div class="messages-content container" v-for="(message, index) in messages">
 	            	<div class="message new" v-if="message.from === 'bot'">
 						<figure class="avatar">
@@ -35,8 +35,10 @@
                         type="text"
                         class="message-input"
                         placeholder="Type message..."
-                        v-model="text"
+                        v-model="text" 
+                        v-validate="'min:1'" 
                         name="text"
+                        v-on:keyup="handleKeypress"
                     />
                     <button type="button" class="fileContainer">
                         File
@@ -102,6 +104,10 @@ export default {
             ],
 		}
 	},
+	updated: function () {
+			let container = this.$refs.chatContent;
+			container.scrollTop = container.scrollHeight;
+	},
 	methods: {
 		formatDate(date) {
 			let hours = date.getHours();
@@ -114,6 +120,40 @@ export default {
 			return `${date.getMonth() +
 			1}/${date.getDate()}/${date.getFullYear()} ${strTime}`;
 
+		},
+		addMessages() {
+			if(this.text !== "") {
+				const newObj = {
+				id: new Date().getTime(),
+					from: 'user',
+					text: this.text,
+					isFile: false,
+					timestamp: new Date(),
+				};
+				this.messages=[...this.messages, newObj]
+				this.text = '';
+			} else {
+				alert("Please type a message")
+			}
+		},
+		handleKeypress: function(e) {
+			// console.log(this.messages)
+			if (e.key === 'Enter' && !e.shiftKey) {
+				let isEmpty = (!this.text || /^\s*$/.test(this.text))
+				if(!isEmpty) {
+					const newObj = {
+						id: new Date().getTime(),
+						from: 'user',
+						text: this.text,
+						isFile: false,
+						timestamp: new Date(),
+					};
+					this.messages=[...this.messages, newObj]
+				} else{
+					alert("Please type a message")
+				}
+				this.text = '';
+			}
 		},
 	}
 }
