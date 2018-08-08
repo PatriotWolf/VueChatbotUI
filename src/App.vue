@@ -1,17 +1,20 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+    <div>
+      <div class="background-image">
+      </div>
+      <div id="app">
+        <Chatbox />
+      </div>
+    </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Chatbox from './components/Chatbox.vue'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
+    Chatbox
   }
 }
 </script>
@@ -23,6 +26,17 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+.background-image {
+    position: fixed;
+    background-image: url(https://i.ytimg.com/vi/NDbLo_BmfP8/maxresdefault.jpg);
+    background-size: cover;
+    display: block;
+    filter: blur(5px);
+    height: 100%;
+    left: 0px;
+    position: fixed;
+    right: 0px;
+    z-index: 1;
 }
 </style>
