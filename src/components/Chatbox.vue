@@ -19,6 +19,16 @@
                                 <img alt="Bot's Avatar" src="../assets/robot01_90832.png" />
                             </figure>
                             <div v-html="message.text"></div>
+                            <div class="btn-group" v-for="(button) in message.button" :key="button.id" v-if="message.button">
+                                    <button
+                                        class="btn btn-xs btn-primary"
+                                        v-on:click="handleClick(button.text,message)"
+                                        :disabled="message.isButtonDisabled"
+                                    >
+                                        {{button.text}}
+                                    </button>
+
+                            </div>
                             <div class="timestamp">
                             {{message.timestamp | formatDate}}
                             </div>
@@ -180,6 +190,32 @@ export default {
             })
             .catch(() => {
                 return `there is something wrong with my end point`;
+            });
+        },
+        handleClick: function(text,element){
+            let array = [...this.messages]; // make a separate copy of the array
+            const index = array.indexOf(element);
+            array[index].isButtonDisabled = true;
+            const newObj = {
+                id: new Date().getTime(),
+                from: 'user',
+                text: text,
+                isFile: false,
+                timestamp: new Date(),
+            };
+            array = [...array, newObj];
+            this.messages = array;
+            this.isTyping = true;
+            this.getMessage(this.text).then(response => {
+                const newObj = {
+                    id: new Date().getTime(),
+                    from: 'bot',
+                    text: response.quote ? response.quote : response,
+                    isFile: false,
+                    timestamp: new Date(),
+                };
+                this.messages = [...this.messages, newObj];
+                this.isTyping = false;
             });
         },
         handleKeypress: function(e) {
