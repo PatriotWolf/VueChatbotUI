@@ -1,62 +1,76 @@
 <template>
-	<div class="ChatBox">
+    <div class="ChatBox">
         <div class="chat">
+
             <div class="chat-title">
+                <figure class="avatar">
+                    <img alt="Bot's Avatar" src="../assets/robot01_90832.png" />
+                </figure>
                 <h1>My Bot</h1>
                 <h2> HYE TALK TO ME !
                 </h2>
-                <figure class="avatar">
-                    <img alt="Vue logo" src="../assets/robot01_90832.png">
-                </figure>
+            </div>
 
-            </div>
             <div class="messages" ref="chatContent">
-            	<div class="messages-content container" v-for="(message, index) in messages">
-	            	<div class="message new" v-if="message.from === 'bot'">
-						<figure class="avatar">
-							<img alt="Vue logo" src="../assets/robot01_90832.png">
-						</figure>
-							<div v-html="message.text"></div>
-						<div class="timestamp">
-                            {{formatDate(message.timestamp)}}
+                <div class="messages-content container">
+                    <div  v-for="(message) in messages" :key="message.id">
+                        <div class="message new" v-if="message.from === 'bot'">
+                            <figure class="avatar">
+                                <img alt="Bot's Avatar" src="../assets/robot01_90832.png" />
+                            </figure>
+                            <div v-html="message.text"></div>
+                            <div class="timestamp">
+                            {{message.timestamp | formatDate}}
+                            </div>
                         </div>
-	            	</div>
-					<div class="message message-personal  new" v-else>
-							<div v-html="message.text"></div>
-						<div class="timestamp">
-                            {{formatDate(message.timestamp)}}
+
+                        <div class="message message-personal  new" v-else>
+                            <div v-html="message.text"></div>
+                            <div class="timestamp">
+                            {{message.timestamp | formatDate}}
+                            </div>
                         </div>
-					</div>
-				</div>
+                    </div>
+                    <div class="message loading new" v-if="isTyping">
+                        <figure class="avatar">
+                            <img alt="Bot's Avatar" src="../assets/robot01_90832.png" />
+                        </figure>
+                        <span />
+                    </div>
+                </div>
             </div>
+
             <div class="message-box">
                 <form class="" @submit.prevent="addMessages">
                     <textarea
-                        type="text"
-                        class="message-input"
-                        placeholder="Type message..."
-                        v-model="text" 
-                        v-validate="'min:1'" 
-                        name="text"
-                        v-on:keyup="handleKeypress"
+                    type="text"
+                    class="message-input"
+                    placeholder="Type message..."
+                    ref="textInput"
+                    v-model="text"
+                    v-validate="'min:1'"
+                    name="text"
+                    v-on:keyup="handleKeypress"
+                    :disabled="isTyping"
                     />
-                    <button type="button" class="fileContainer">
+
+                    <button type="button" class="fileContainer" :disabled="isTyping">
                         File
                         <input
-                            type="file"
-                            class="input-pic"
+                        type="file"
+                        class="input-pic"
                         />
                     </button>
                     <button
-                        type="submit"
-                        class="message-submit"
+                    type="submit"
+                    class="message-submit"
+                    :disabled="isTyping"
                     >
                         Send
                     </button>
                 </form>
             </div>
         </div>
-        <div class="bg" />
     </div>
 </template>
 <script>
@@ -65,10 +79,11 @@ export default {
 	props: {
 		msg: String
 	},
-	data() {
-		return {
-			text: '',
-			messages: [
+    data() {
+        return {
+            text: '',
+            isTyping: false,
+            messages: [
                 {
                     id: new Date().getTime(),
                     from: 'bot',
@@ -102,60 +117,103 @@ export default {
                     timestamp: new Date(),
                 },
             ],
-		}
-	},
-	updated: function () {
-			let container = this.$refs.chatContent;
-			container.scrollTop = container.scrollHeight;
-	},
+        }
+    },
+    updated: function () {
+        let container = this.$refs.chatContent;
+        container.scrollTop = container.scrollHeight;
+        this.$refs.textInput.focus();
+    },
+    filters: {
+        formatDate: function (date) {
+            let hours = date.getHours();
+            let minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'pm' : 'am';
+            hours %= 12;
+            hours = hours || 12; // the hour '0' should be '12'
+            minutes = minutes < 10 ? `0${minutes}` : minutes;
+            const strTime = `${hours}:${minutes} ${ampm}`;
+            return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()} ${strTime}`;
+        }
+    },
 	methods: {
-		formatDate(date) {
-			let hours = date.getHours();
-			let minutes = date.getMinutes();
-			const ampm = hours >= 12 ? 'pm' : 'am';
-			hours %= 12;
-			hours = hours || 12; // the hour '0' should be '12'
-			minutes = minutes < 10 ? `0${minutes}` : minutes;
-			const strTime = `${hours}:${minutes} ${ampm}`;
-			return `${date.getMonth() +
-			1}/${date.getDate()}/${date.getFullYear()} ${strTime}`;
-
-		},
-		addMessages() {
-			if(this.text !== "") {
-				const newObj = {
-				id: new Date().getTime(),
-					from: 'user',
-					text: this.text,
-					isFile: false,
-					timestamp: new Date(),
-				};
-				this.messages=[...this.messages, newObj]
-				this.text = '';
-			} else {
-				alert("Please type a message")
-			}
-		},
-		handleKeypress: function(e) {
-			// console.log(this.messages)
-			if (e.key === 'Enter' && !e.shiftKey) {
-				let isEmpty = (!this.text || /^\s*$/.test(this.text))
-				if(!isEmpty) {
-					const newObj = {
-						id: new Date().getTime(),
-						from: 'user',
-						text: this.text,
-						isFile: false,
-						timestamp: new Date(),
-					};
-					this.messages=[...this.messages, newObj]
-				} else{
-					alert("Please type a message")
-				}
-				this.text = '';
-			}
-		},
-	}
+        addMessages() {
+            if(this.text !== "") {
+                const newObj = {
+                    id: new Date().getTime(),
+                    from: 'user',
+                    text: this.text,
+                    isFile: false,
+                    timestamp: new Date(),
+                };
+                this.messages = [...this.messages, newObj];
+                this.getMessage(this.text).then(response => {
+                    const newObj = {
+                        id: new Date().getTime(),
+                        from: 'bot',
+                        text: response.quote ? response.quote : response,
+                        isFile: false,
+                        timestamp: new Date(),
+                    };
+                    this.messages = [...this.messages, newObj];
+                    this.isTyping = false;
+                });
+                this.text = '';
+                this.isTyping = true;
+            } else {
+                alert("Please type a message");
+            }
+        },
+        getMessage(text){
+            return fetch(`https://api.datamuse.com/words?rel_rhy=${text}`,
+            {
+                method: "GET",
+            })
+            .then((response) =>
+                response.json()
+            )
+            .then((responseData) => {
+                const rhymes = responseData.map(obj => {
+                  return obj.word
+                }).slice(0,3)
+                return `${text} rhymes with ${(rhymes.length !== 0) ? rhymes : 'nothing'}`;
+            })
+            .catch(() => {
+                return `there is something wrong with my end point`;
+            });
+        },
+        handleKeypress: function(e) {
+        // console.log(this.messages)
+            if (e.key === 'Enter' && !e.shiftKey) {
+                let isEmpty = (!this.text || /^\s*$/.test(this.text))
+                if(!isEmpty) {
+                    const newObj = {
+                        id: new Date().getTime(),
+                        from: 'user',
+                        text: this.text,
+                        isFile: false,
+                        timestamp: new Date(),
+                    };
+                    this.messages = [...this.messages, newObj];
+                    this.getMessage(this.text).then(response => {
+                        const newObj = {
+                            id: new Date().getTime(),
+                            from: 'bot',
+                            text: response.quote ? response.quote : response,
+                            isFile: false,
+                            timestamp: new Date(),
+                        };
+                        this.messages = [...this.messages, newObj];
+                        this.isTyping = false;
+                    });
+                    this.isTyping = true;
+                } else{
+                    alert("Please type a message")
+                }
+                this.text = '';
+            }
+        },
+    }
 }
 </script>
 <style scoped>
