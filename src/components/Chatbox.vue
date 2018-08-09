@@ -185,8 +185,10 @@ export default {
             .then((responseData) => {
                 const rhymes = responseData.map(obj => {
                   return obj.word
-                }).slice(0,3)
-                return `${text} rhymes with ${(rhymes.length !== 0) ? rhymes : 'nothing'}`;
+                }).slice(0,3);
+                const speech = `${text} rhymes with ${(rhymes.length !== 0) ? rhymes : 'nothing'}`;
+                responsiveVoice.speak( speech, "UK English Male");
+                return speech;
             })
             .catch(() => {
                 return `there is something wrong with my end point`;
@@ -206,7 +208,7 @@ export default {
             array = [...array, newObj];
             this.messages = array;
             this.isTyping = true;
-            this.getMessage(this.text).then(response => {
+            this.getMessage(text).then(response => {
                 const newObj = {
                     id: new Date().getTime(),
                     from: 'bot',
