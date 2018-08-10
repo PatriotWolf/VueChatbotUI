@@ -10,12 +10,21 @@
 
 <script>
 import Chatbox from './components/Chatbox.vue'
+require('howler');
 
 export default {
   name: 'app',
   components: {
     Chatbox
-  }
+  },
+  mounted: function() {
+        new window.Howl({
+            src: 'http://66.90.93.122/ost/digimon-world-3/jlujtork/Main%20Lobby.mp3',
+            autoplay: true,
+            loop: true,
+            volume: 1
+        });
+    }
 }
 </script>
 

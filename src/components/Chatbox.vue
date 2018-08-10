@@ -36,6 +36,7 @@
 
                         <div class="message message-personal  new" v-else>
                             <div v-html="message.text"></div>
+                            <img :src="message.url" v-if="message.url" />
                             <div class="timestamp">
                             {{message.timestamp | formatDate}}
                             </div>
@@ -69,6 +70,7 @@
                         <input
                         type="file"
                         class="input-pic"
+                        @change="addImage"
                         />
                     </button>
                     <button
@@ -174,6 +176,23 @@ export default {
                 alert("Please type a message");
             }
         },
+        addImage(e){
+            const reader = new FileReader();
+            let url;
+            reader.onload = () => {
+                url = reader.result;
+                const newObj = {
+                    id: new Date().getTime(),
+                    from: 'user',
+                    url,
+                    isFile: true,
+                    timestamp: new Date(),
+                };
+                this.messages = [...this.messages, newObj];
+                this.updated();
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        },
         getMessage(text){
             return fetch(`https://api.datamuse.com/words?rel_rhy=${text}`,
             {
@@ -187,7 +206,7 @@ export default {
                   return obj.word
                 }).slice(0,3);
                 const speech = `${text} rhymes with ${(rhymes.length !== 0) ? rhymes : 'nothing'}`;
-                responsiveVoice.speak( speech, "UK English Male");
+                window.responsiveVoice.speak( speech, "UK English Male");
                 return speech;
             })
             .catch(() => {
